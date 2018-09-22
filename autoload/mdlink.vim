@@ -127,7 +127,6 @@ endfunction
 function! s:to_markdown(messages) abort
   let channel = ch_open("127.0.0.1:11111", {"mode": "json"})
   for message in a:messages
-    " call ch_sendexpr(channel, {"url_hash_set": url_hash_set, "start": a:start, "end": a:end}, {"callback": function("s:get_title")})
     call ch_sendexpr(channel, message, {"callback": function("s:get_title")})
     let s:call_cnt += 1
   endfor
