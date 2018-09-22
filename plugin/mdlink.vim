@@ -20,8 +20,10 @@ endif
 let s:save_cpo = &cpo
 set cpo&vim
 
-let s:cmd = expand('<sfile>:h:h:gs?\\?/?') . '/mdlink/mdlink' . (has('win32') ? '.exe' : '')
+let s:base = expand('<sfile>:h:h:gs?\\?/?')
+let s:cmd = s:base . '/mdlink/mdlink' . (has('win32') ? '.exe' : '')
 if !filereadable(s:cmd)
+  execute(":cd " . s:base)
   call system("cd mdlink && go get -d && go build")
 endif
 let job = job_start(s:cmd)
