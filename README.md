@@ -15,21 +15,19 @@ Checkout into your plugin directory. Or use plugin manager.
 ## Settings
 
 1. Create $HOME/.vim-mdlink file like the following. And input your github personal token.
-  ```
-let g:vim_mdlink = {
-  \ 'github_token':   'your personal token'
-\}
-  ```
+
+        let g:vim_mdlink = {
+          \ 'github_token':   'your personal token'
+        \}
 
 1. If using GHE, add optional settings about GHE.
-  ```
-let g:vim_mdlink = {
-  \ 'github_token':   'your personal token',
-  \ 'ghe_url':        'https://ghe.domain.name/',
-  \ 'ghe_api_url':    'https://ghe.domain.name/api/v3/repos/',
-  \ 'ghe_token':      'your personal token'
-\}
-  ```
+
+        let g:vim_mdlink = {
+          \ 'github_token':   'your personal token',
+          \ 'ghe_url':        'https://ghe.domain.name/',
+          \ 'ghe_api_url':    'https://ghe.domain.name/api/v3/repos/',
+          \ 'ghe_token':      'your personal token'
+        \}
 
 ## Usage
 
