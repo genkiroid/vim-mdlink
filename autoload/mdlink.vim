@@ -125,7 +125,7 @@ endfunction
 
 
 function! s:to_markdown(messages) abort
-  let channel = ch_open("127.0.0.1:11111", {"mode": "json"})
+  let channel = ch_open("127.0.0.1:11111", {"mode": "json", "waittime": 50})
   for message in a:messages
     call ch_sendexpr(channel, message, {"callback": function("s:get_title")})
     let s:call_cnt += 1

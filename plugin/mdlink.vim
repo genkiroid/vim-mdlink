@@ -23,8 +23,9 @@ set cpo&vim
 let s:base = expand('<sfile>:h:h:gs?\\?/?')
 let s:cmd = s:base . '/mdlink/mdlink' . (has('win32') ? '.exe' : '')
 if !filereadable(s:cmd)
-  execute(":cd " . s:base)
-  call system("cd mdlink && go get -d && go build")
+  execute(":cd " . s:base . "/mdlink")
+  call system("go get -d")
+  call system("go build")
 endif
 let job = job_start(s:cmd)
 
