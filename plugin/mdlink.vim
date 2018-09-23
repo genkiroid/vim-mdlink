@@ -20,12 +20,14 @@ endif
 let s:save_cpo = &cpo
 set cpo&vim
 
+let s:cwd = getcwd()
 let s:base = expand('<sfile>:h:h:gs?\\?/?')
 let s:cmd = s:base . '/mdlink/mdlink' . (has('win32') ? '.exe' : '')
 if !filereadable(s:cmd)
   execute(":cd " . s:base . "/mdlink")
   call system("go get -d")
   call system("go build")
+  execute(":cd " . s:cwd)
 endif
 let job = job_start(s:cmd)
 
