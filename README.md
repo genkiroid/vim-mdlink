@@ -8,6 +8,7 @@ Checkout into your plugin directory. Or use plugin manager.
 
 ## Requirements
 
+* Vim 8.0+
 * [Go](https://golang.org/)
 * [kana/vim-textobj-user](https://github.com/kana/vim-textobj-user)
 * [mattn/vim-textobj-url](https://github.com/mattn/vim-textobj-url)
