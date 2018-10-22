@@ -140,6 +140,8 @@ function! s:to_markdown(messages) abort
     endif
     sleep 1ms
   endwhile
+
+  call ch_close(channel)
 endfunction
 
 let &cpo = s:save_cpo
