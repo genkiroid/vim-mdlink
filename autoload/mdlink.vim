@@ -13,14 +13,17 @@ function! mdlink#make_markdown_link(is_only_on_cursor) range
   if a:is_only_on_cursor
     let url = s:get_url()
     if url != ''
-      let messages += [s:create_message(url, col("."), line("."), line("."))]
+      let messages += [s:create_message(url, col("."), 1, line("."), line("."))]
       call s:to_markdown(messages)
     endif
     return
   endif
 
+  let counter = 1
+
   for row in range(a:firstline, a:lastline)
-    let messages += s:create_messages(row, a:firstline, a:lastline)
+    let messages += s:create_messages(row, counter, a:firstline, a:lastline)
+    let counter += 1
   endfor
   call s:to_markdown(messages)
 endfunction
@@ -46,8 +49,8 @@ function! s:get_url() abort
   return url
 endfunction
 
-function! s:create_message(url, col, start, end) abort
-  let hash = sha256(a:url . string(a:col))
+function! s:create_message(url, col, counter, start, end) abort
+  let hash = sha256(a:url . string(a:col) . string(a:counter))
   call s:replace_to_hash(hash)
   return {"hash": hash, "url": a:url, "api_endpoint": s:api_endpoint(a:url), "token": s:token(a:url), "start": a:start, "end": a:end}
 endfunction
@@ -88,14 +91,14 @@ function! s:token(url) abort
   return ''
 endfunction
 
-function! s:create_messages(row, start, end) abort
+function! s:create_messages(row, counter, start, end) abort
   let messages = []
   let col = s:get_url_col_position(a:row)
   while col != -1
     call cursor(a:row, col)
     let url = s:get_url()
     if url != ''
-      call add(messages, s:create_message(url, col, a:start, a:end))
+      call add(messages, s:create_message(url, col, a:counter, a:start, a:end))
     endif
     let col = s:get_url_col_position(a:row)
   endwhile
