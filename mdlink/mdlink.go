@@ -38,7 +38,7 @@ type Body struct {
 	MarkdownLink string  `json:"markdown_link"`
 }
 
-type message struct {
+type Message struct {
 	ID   float64
 	Body Body
 }
@@ -47,13 +47,13 @@ func handleConn(c net.Conn) {
 	defer c.Close()
 	s := bufio.NewScanner(c)
 	for s.Scan() {
-		var m message
+		var m Message
 		err := json.Unmarshal(s.Bytes(), &m)
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		go func(m *message) {
+		go func(m *Message) {
 			err := m.createMarkdownLink()
 			if err != nil {
 				log.Println(err)
@@ -68,7 +68,7 @@ func handleConn(c net.Conn) {
 	}
 }
 
-func (m *message) UnmarshalJSON(b []byte) error {
+func (m *Message) UnmarshalJSON(b []byte) error {
 	var v [2]interface{}
 	if err := json.Unmarshal(b, &v); err != nil {
 		return err
@@ -86,14 +86,14 @@ func (m *message) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (m *message) MarshalJSON() ([]byte, error) {
+func (m *Message) MarshalJSON() ([]byte, error) {
 	var v [2]interface{}
 	v[0] = m.ID
 	v[1] = m.Body
 	return json.Marshal(v)
 }
 
-func (m *message) createMarkdownLink() error {
+func (m *Message) createMarkdownLink() error {
 	var title = ""
 	var err error
 
@@ -114,7 +114,7 @@ func (m *message) createMarkdownLink() error {
 	return nil
 }
 
-func (m *message) pageTitle() (string, error) {
+func (m *Message) pageTitle() (string, error) {
 	res, err := http.Get(m.Body.URL)
 	if err != nil {
 		return "", err
@@ -142,7 +142,7 @@ func (m *message) pageTitle() (string, error) {
 	return title, nil
 }
 
-func (m *message) issueTitle() (string, error) {
+func (m *Message) issueTitle() (string, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", m.Body.APIEndpoint, nil)
 	if err != nil {
