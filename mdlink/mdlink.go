@@ -28,7 +28,7 @@ func main() {
 	}
 }
 
-type message struct {
+type Body struct {
 	Hash         string  `json:"hash"`
 	URL          string  `json:"url"`
 	APIEndpoint  string  `json:"api_endpoint"`
@@ -38,23 +38,20 @@ type message struct {
 	MarkdownLink string  `json:"markdown_link"`
 }
 
+type message struct {
+	ID   float64
+	Body Body
+}
+
 func handleConn(c net.Conn) {
 	defer c.Close()
 	s := bufio.NewScanner(c)
 	for s.Scan() {
-		var v [2]interface{}
-		err := json.Unmarshal(s.Bytes(), &v)
+		var m message
+		err := json.Unmarshal(s.Bytes(), &m)
 		if err != nil {
 			log.Println(err)
 			return
-		}
-		m := &message{
-			Hash:        v[1].(map[string]interface{})["hash"].(string),
-			URL:         v[1].(map[string]interface{})["url"].(string),
-			APIEndpoint: v[1].(map[string]interface{})["api_endpoint"].(string),
-			Token:       v[1].(map[string]interface{})["token"].(string),
-			Start:       v[1].(map[string]interface{})["start"].(float64),
-			End:         v[1].(map[string]interface{})["end"].(float64),
 		}
 		go func(m *message) {
 			err := m.createMarkdownLink()
@@ -62,21 +59,45 @@ func handleConn(c net.Conn) {
 				log.Println(err)
 				return
 			}
-			v[1] = m
-			err = json.NewEncoder(c).Encode(v)
+			err = json.NewEncoder(c).Encode(m)
 			if err != nil {
 				log.Println(err)
 				return
 			}
-		}(m)
+		}(&m)
 	}
+}
+
+func (m *message) UnmarshalJSON(b []byte) error {
+	var v [2]interface{}
+	if err := json.Unmarshal(b, &v); err != nil {
+		return err
+	}
+	m.ID = v[0].(float64)
+	m.Body = Body{
+		Hash:         v[1].(map[string]interface{})["hash"].(string),
+		URL:          v[1].(map[string]interface{})["url"].(string),
+		APIEndpoint:  v[1].(map[string]interface{})["api_endpoint"].(string),
+		Token:        v[1].(map[string]interface{})["token"].(string),
+		Start:        v[1].(map[string]interface{})["start"].(float64),
+		End:          v[1].(map[string]interface{})["end"].(float64),
+		MarkdownLink: "",
+	}
+	return nil
+}
+
+func (m *message) MarshalJSON() ([]byte, error) {
+	var v [2]interface{}
+	v[0] = m.ID
+	v[1] = m.Body
+	return json.Marshal(v)
 }
 
 func (m *message) createMarkdownLink() error {
 	var title = ""
 	var err error
 
-	if m.Token == "" {
+	if m.Body.Token == "" {
 		title, err = m.pageTitle()
 		if err != nil {
 			return err
@@ -88,13 +109,13 @@ func (m *message) createMarkdownLink() error {
 		}
 	}
 
-	m.MarkdownLink = fmt.Sprintf("[%s](%s)", title, m.URL)
+	m.Body.MarkdownLink = fmt.Sprintf("[%s](%s)", title, m.Body.URL)
 
 	return nil
 }
 
 func (m *message) pageTitle() (string, error) {
-	res, err := http.Get(m.URL)
+	res, err := http.Get(m.Body.URL)
 	if err != nil {
 		return "", err
 	}
@@ -123,11 +144,11 @@ func (m *message) pageTitle() (string, error) {
 
 func (m *message) issueTitle() (string, error) {
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", m.APIEndpoint, nil)
+	req, err := http.NewRequest("GET", m.Body.APIEndpoint, nil)
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("Authorization", "token "+m.Token)
+	req.Header.Add("Authorization", "token "+m.Body.Token)
 	res, err := client.Do(req)
 	if err != nil {
 		return "", err
@@ -144,7 +165,7 @@ func (m *message) issueTitle() (string, error) {
 	}
 	title := v.(map[string]interface{})["title"]
 	if title == nil {
-		return m.URL, nil
+		return m.Body.URL, nil
 	}
 	return title.(string), nil
 }
