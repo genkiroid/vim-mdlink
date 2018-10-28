@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -115,7 +116,14 @@ func (m *Message) createMarkdownLink() error {
 }
 
 func (m *Message) pageTitle() (string, error) {
-	res, err := http.Get(m.Body.URL)
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
+	res, err := client.Get(m.Body.URL)
 	if err != nil {
 		return "", err
 	}
