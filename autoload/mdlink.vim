@@ -62,6 +62,7 @@ function! s:api_endpoint(url) abort
       let apiUrl = substitute(apiUrl, g:vim_mdlink['ghe_url'], g:vim_mdlink['ghe_api_url'], 'g')
     endif
     let apiUrl = substitute(apiUrl, '/pull/', '/pulls/', 'g')
+    let apiUrl = substitute(apiUrl, '/milestone/', '/milestones/', 'g')
     return apiUrl
   endif
   return a:url
