@@ -25,7 +25,6 @@ let s:base = expand('<sfile>:h:h:gs?\\?/?')
 let s:cmd = s:base . '/mdlink/mdlink' . (has('win32') ? '.exe' : '')
 if !filereadable(s:cmd)
   execute(":cd " . s:base . "/mdlink")
-  call system("go get -d")
   call system("go build")
   execute(":cd " . s:cwd)
 endif
